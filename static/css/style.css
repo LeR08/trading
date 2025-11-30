@@ -1,0 +1,388 @@
+/* Modern Trading Bot Dashboard Styles */
+
+:root {
+    --bg-dark: #0a0e27;
+    --bg-card: #141b2d;
+    --bg-hover: #1a2332;
+    --accent-blue: #00d4ff;
+    --accent-green: #00ff88;
+    --accent-red: #ff4757;
+    --accent-yellow: #ffd700;
+    --text-primary: #ffffff;
+    --text-secondary: #8b92a7;
+    --border-color: #2d3548;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--bg-dark) 0%, #0d1117 100%);
+    color: var(--text-primary);
+    min-height: 100vh;
+}
+
+.navbar {
+    background: var(--bg-card) !important;
+    border-bottom: 2px solid var(--border-color);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-blue) !important;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.container-fluid {
+    padding: 2rem;
+}
+
+/* Cards */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.1);
+}
+
+.card-header {
+    background: var(--bg-hover);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+}
+
+.status-running {
+    background: rgba(0, 255, 136, 0.2);
+    color: var(--accent-green);
+    border: 1px solid var(--accent-green);
+}
+
+.status-stopped {
+    background: rgba(255, 71, 87, 0.2);
+    color: var(--accent-red);
+    border: 1px solid var(--accent-red);
+}
+
+/* Buttons */
+.btn {
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--accent-blue), #0099cc);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #00b8e6, #0088bb);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--accent-green), #00cc70);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #00e67a, #00b360);
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, var(--accent-red), #e6394a);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #ff5a6b, #d6323f);
+    box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
+}
+
+/* Metric Cards */
+.metric-card {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.metric-change {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.positive {
+    color: var(--accent-green);
+}
+
+.negative {
+    color: var(--accent-red);
+}
+
+/* Signal Indicator */
+.signal-indicator {
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border: 2px solid;
+}
+
+.signal-buy {
+    background: rgba(0, 255, 136, 0.1);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+.signal-sell {
+    background: rgba(255, 71, 87, 0.1);
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+    box-shadow: 0 0 20px rgba(255, 71, 87, 0.2);
+}
+
+.signal-hold {
+    background: rgba(255, 215, 0, 0.1);
+    border-color: var(--accent-yellow);
+    color: var(--accent-yellow);
+}
+
+/* Indicators Grid */
+.indicators-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.indicator-item {
+    background: var(--bg-hover);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-blue);
+}
+
+.indicator-name {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.indicator-value {
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+/* Logs */
+.logs-container {
+    background: #000;
+    border-radius: 8px;
+    padding: 1rem;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+}
+
+.log-entry {
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #222;
+}
+
+.log-time {
+    color: var(--text-secondary);
+    margin-right: 0.5rem;
+}
+
+.log-info {
+    color: var(--accent-blue);
+}
+
+.log-success {
+    color: var(--accent-green);
+}
+
+.log-warning {
+    color: var(--accent-yellow);
+}
+
+.log-error {
+    color: var(--accent-red);
+}
+
+/* Positions Table */
+.table {
+    color: var(--text-primary);
+    margin-top: 1rem;
+}
+
+.table thead th {
+    background: var(--bg-hover);
+    border-color: var(--border-color);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.table tbody td {
+    border-color: var(--border-color);
+    vertical-align: middle;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* Form Controls */
+.form-control {
+    background: var(--bg-hover);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 0.7rem;
+}
+
+.form-control:focus {
+    background: var(--bg-hover);
+    border-color: var(--accent-blue);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.2rem rgba(0, 212, 255, 0.25);
+}
+
+.form-label {
+    color: var(--text-secondary);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Loading Spinner */
+.spinner {
+    border: 3px solid var(--border-color);
+    border-top: 3px solid var(--accent-blue);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-blue);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 1rem;
+    }
+
+    .metric-value {
+        font-size: 1.5rem;
+    }
+
+    .indicators-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Pulse effect for live data */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.live-update {
+    animation: pulse 2s ease-in-out infinite;
+}

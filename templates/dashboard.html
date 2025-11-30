@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Kraken Trading Bot - Dashboard</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-rocket"></i> Kraken Trading Bot
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <!-- Control Panel -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-sliders-h"></i> Control Panel</span>
+                        <span class="status-badge" id="statusBadge">
+                            <i class="fas fa-circle"></i> <span id="statusText">Stopped</span>
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <button class="btn btn-success me-2" id="startBtn" onclick="startBot()">
+                                    <i class="fas fa-play"></i> Start Bot
+                                </button>
+                                <button class="btn btn-danger me-2" id="stopBtn" onclick="stopBot()" disabled>
+                                    <i class="fas fa-stop"></i> Stop Bot
+                                </button>
+                                <button class="btn btn-primary" onclick="refreshData()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
+                                </button>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <span class="text-secondary">Iterations: </span>
+                                <span class="fw-bold" id="iterations">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Overview -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">BTC Price</div>
+                    <div class="metric-value" id="btcPrice">$0</div>
+                    <div class="metric-change" id="priceChange">--</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">24h High</div>
+                    <div class="metric-value" id="high24h">$0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">24h Low</div>
+                    <div class="metric-value" id="low24h">$0</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <div class="metric-label">24h Volume</div>
+                    <div class="metric-value" id="volume24h">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trading Signal & Balance -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-line"></i> Trading Signal
+                    </div>
+                    <div class="card-body">
+                        <div class="signal-indicator signal-hold" id="signalIndicator">
+                            <i class="fas fa-minus-circle"></i> HOLD
+                        </div>
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Signal Strength:</span>
+                                <span class="fw-bold" id="signalStrength">0%</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar" id="signalProgress" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-secondary">Reason:</small>
+                                <div id="signalReason" class="mt-1">Waiting for data...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-wallet"></i> Account Balance
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="metric-label">USD Balance</div>
+                                <div class="metric-value" id="usdBalance">$0.00</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-label">BTC Balance</div>
+                                <div class="metric-value" id="btcBalance">0.000000</div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="metric-label">Total Value</div>
+                                <div class="metric-value" id="totalValue">$0.00</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="metric-label">Open Positions</div>
+                                <div class="metric-value" id="openPositions">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Indicators -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar"></i> Technical Indicators
+                    </div>
+                    <div class="card-body">
+                        <div class="indicators-grid" id="indicatorsGrid">
+                            <div class="indicator-item">
+                                <div class="indicator-name">RSI (14)</div>
+                                <div class="indicator-value" id="ind_rsi">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">MACD</div>
+                                <div class="indicator-value" id="ind_macd">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">EMA (9)</div>
+                                <div class="indicator-value" id="ind_ema_short">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">EMA (21)</div>
+                                <div class="indicator-value" id="ind_ema_medium">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">EMA (50)</div>
+                                <div class="indicator-value" id="ind_ema_long">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">Stochastic</div>
+                                <div class="indicator-value" id="ind_stoch">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">BB Upper</div>
+                                <div class="indicator-value" id="ind_bb_upper">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">BB Lower</div>
+                                <div class="indicator-value" id="ind_bb_lower">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">Volume Ratio</div>
+                                <div class="indicator-value" id="ind_volume">--</div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-name">ATR</div>
+                                <div class="indicator-value" id="ind_atr">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Positions & Recent Trades -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-briefcase"></i> Open Positions
+                    </div>
+                    <div class="card-body">
+                        <div id="positionsContainer">
+                            <p class="text-secondary text-center">No open positions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-history"></i> Recent Trades
+                    </div>
+                    <div class="card-body">
+                        <div id="tradesContainer">
+                            <p class="text-secondary text-center">No trades yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live Logs -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-terminal"></i> Live Logs
+                    </div>
+                    <div class="card-body">
+                        <div class="logs-container" id="logsContainer">
+                            <div class="log-entry">
+                                <span class="log-time">--:--:--</span>
+                                <span class="log-info">Waiting for connection...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

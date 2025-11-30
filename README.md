@@ -1,8 +1,25 @@
 # 🚀 Kraken Professional Margin Trading Bot
 
-Un bot de trading professionnel pour Kraken avec support du trading sur marge (leverage), analyse technique multi-indicateurs, et gestion automatique des risques.
+Un bot de trading professionnel pour Kraken avec **interface web moderne**, support du trading sur marge (leverage), analyse technique multi-indicateurs, et gestion automatique des risques.
+
+## ✨ Nouvelle Interface Web!
+
+🌐 **Dashboard en temps réel** avec Socket.IO pour monitoring et contrôle complet du bot!
+
+![Dashboard Features](https://img.shields.io/badge/Dashboard-Real--time-00d4ff)
+![Trading-Automated](https://img.shields.io/badge/Trading-Automated-00ff88)
+![Leverage-3x](https://img.shields.io/badge/Leverage-3x-ffd700)
 
 ## ⚡ Fonctionnalités
+
+### 🌐 Interface Web Moderne
+- **Dashboard en temps réel** - Mises à jour live avec WebSocket
+- **Configuration visuelle** - Configurer les clés API via l'interface
+- **Graphiques et métriques** - Visualisation complète des indicateurs
+- **Contrôle du bot** - Démarrer/Arrêter en un clic
+- **Logs en direct** - Surveillance en temps réel
+- **Design moderne** - Interface sombre et professionnelle
+- **Responsive** - Fonctionne sur mobile et desktop
 
 ### 📊 Analyse Technique Avancée
 - **RSI (Relative Strength Index)** - Détection surachat/survente
@@ -47,7 +64,7 @@ Le bot analyse 7 indicateurs avec des poids différents :
 
 ## 🔧 Installation
 
-### 1. Cloner le projet
+### 1. Aller dans le répertoire
 ```bash
 cd /home/user/trading
 ```
@@ -65,124 +82,117 @@ venv\Scripts\activate  # Windows
 pip install -r requirements.txt
 ```
 
-### 4. Configurer les clés API
-
-**⚠️ IMPORTANT SÉCURITÉ:**
-1. Connectez-vous à votre compte Kraken
-2. Allez dans Settings → API
-3. **RÉVOQUEZ** la clé que vous avez partagée publiquement
-4. Créez une **NOUVELLE** clé API avec les permissions:
-   - Query Funds
-   - Create & Modify Orders
-   - Query Open Orders & Trades
-   - Query Closed Orders & Trades
-
-5. Éditez le fichier `.env`:
-```bash
-nano .env  # ou utilisez votre éditeur préféré
-```
-
-6. Ajoutez vos nouvelles clés:
-```env
-KRAKEN_API_KEY=votre_nouvelle_cle_api
-KRAKEN_API_SECRET=votre_secret_api
-```
-
 ## 🚀 Utilisation
 
-### Démarrer le bot
+### 🌐 Interface Web (RECOMMANDÉ)
+
+**Démarrer l'interface web:**
+```bash
+./start_web.sh
+# ou
+python web_app.py
+```
+
+Puis ouvrez votre navigateur à:
+- **Dashboard:** http://localhost:5000
+- **Settings:** http://localhost:5000/settings
+
+#### Configuration via l'interface web:
+1. Allez sur http://localhost:5000/settings
+2. Entrez vos clés API Kraken
+3. Cliquez sur "Test Connection" pour vérifier
+4. Sauvegardez la configuration
+5. Retournez au Dashboard
+6. Cliquez sur "Start Bot" pour démarrer!
+
+### 💻 Mode Console (Alternative)
+
+**Démarrer en mode console:**
 ```bash
 python bot.py
 ```
 
-### Mode Test (Recommandé)
-Avant de trader en réel, testez avec de petits montants:
-1. Modifiez `.env`:
-```env
-MIN_ORDER_SIZE=0.001  # Montant minimum
-MAX_POSITION_SIZE=0.01  # Limitez vos positions
+**Configuration manuelle (.env):**
+```bash
+nano .env
 ```
 
-2. Surveillez les premiers trades attentivement
+Ajoutez vos clés:
+```env
+KRAKEN_API_KEY=votre_cle_api
+KRAKEN_API_SECRET=votre_secret_api
+```
 
-### Arrêter le bot
-Utilisez `Ctrl+C` pour arrêter le bot proprement. Il affichera un résumé des trades.
+## 🎨 Captures d'écran de l'Interface
+
+### Dashboard Principal
+- Prix BTC en temps réel
+- Indicateurs techniques (RSI, MACD, EMA, etc.)
+- Signal de trading actuel (BUY/SELL/HOLD)
+- Balance du compte
+- Positions ouvertes
+- Logs en direct
+
+### Page Settings
+- Configuration des clés API
+- Test de connexion
+- Paramètres de trading (leverage, TP, SL)
+- Gestion des risques
 
 ## ⚙️ Configuration
 
-Éditez le fichier `.env` pour personnaliser:
+### Via l'Interface Web
+Accédez à http://localhost:5000/settings pour configurer:
 
+- **API Credentials** - Clés Kraken
+- **Trading Pair** - XXBTZUSD (BTC/USD)
+- **Leverage** - 1-5x (par défaut 3x)
+- **Take Profit** - % de profit (par défaut 3%)
+- **Stop Loss** - % de perte (par défaut 9%)
+- **Check Interval** - Secondes entre analyses (par défaut 60s)
+- **Position Limits** - Taille min/max des ordres
+
+### Via Fichier .env
 ```env
-# Paire de trading
+KRAKEN_API_KEY=votre_cle_api
+KRAKEN_API_SECRET=votre_secret_api
+
 TRADING_PAIR=XXBTZUSD
-
-# Effet de levier (1-5)
 LEVERAGE=3
-
-# Take Profit en % (par défaut 3%)
 TAKE_PROFIT_PERCENT=3.0
-
-# Stop Loss en % (par défaut 9%)
 STOP_LOSS_PERCENT=9.0
 
-# Intervalle de vérification en secondes (par défaut 60)
 CHECK_INTERVAL=60
-
-# Taille minimum d'ordre (BTC)
 MIN_ORDER_SIZE=0.001
-
-# Taille maximum de position (BTC)
 MAX_POSITION_SIZE=0.1
 
-# Limite de perte journalière (%)
 MAX_DAILY_LOSS_PERCENT=15.0
-
-# Nombre max de positions ouvertes
 MAX_OPEN_POSITIONS=1
 ```
 
-## 📊 Exemple de Sortie
+## 📊 Fonctionnalités de l'Interface Web
 
-```
-╔════════════════════════════════════════════════════════════════╗
-║                                                                ║
-║          🚀 KRAKEN PROFESSIONAL MARGIN TRADING BOT 🚀          ║
-║                                                                ║
-║  ⚡ Multi-Indicator Strategy                                   ║
-║  📊 Technical Analysis: RSI, MACD, EMA, BB, Stochastic         ║
-║  💰 3x Leverage Margin Trading                                 ║
-║  🎯 Auto TP/SL: +3% / -9%                                      ║
-║  🛡️ Advanced Risk Management                                   ║
-║                                                                ║
-╚════════════════════════════════════════════════════════════════╝
+### Dashboard en Temps Réel
+- ✅ Mises à jour automatiques via WebSocket
+- ✅ Prix BTC et données de marché live
+- ✅ Indicateurs techniques en temps réel
+- ✅ Signal de trading actuel avec force du signal
+- ✅ Balance du compte actualisée
+- ✅ Positions ouvertes avec P&L
+- ✅ Historique des trades récents
+- ✅ Logs en direct avec code couleur
 
-======================================================================
-🕐 2025-11-30 21:52:30 | Iteration #1
-======================================================================
+### Contrôle du Bot
+- ✅ Démarrer/Arrêter le bot en un clic
+- ✅ Statut visible (Running/Stopped)
+- ✅ Compteur d'itérations
+- ✅ Rafraîchissement manuel des données
 
-📈 Market Data (BTC/USD):
-   Current Price: $97,234.50
-   24h High: $98,150.00
-   24h Low: $95,800.00
-   24h Volume: 1,234.56 BTC
-
-💼 Account Balance:
-   USD: $10,000.00
-   BTC: 0.000000 ($0.00)
-
-📊 Open Positions: 0
-
-🎯 Trading Signal:
-   Signal: BUY
-   Strength: 72.5%
-   Reason: RSI oversold (28.5), MACD bullish crossover, Strong uptrend
-
-📊 Key Indicators:
-   RSI: 28.5 | MACD: 125.34 | Stoch: 18.2
-   EMA(9): $96,850 | EMA(21): $95,920 | EMA(50): $94,100
-   BB Upper: $99,200 | BB Lower: $94,800
-   Volume Ratio: 1.85x | ATR: $1,234.50
-```
+### Configuration Facile
+- ✅ Formulaire pour les clés API
+- ✅ Test de connexion avant sauvegarde
+- ✅ Configuration complète du trading
+- ✅ Aide et documentation intégrée
 
 ## ⚠️ AVERTISSEMENTS IMPORTANTS
 
@@ -198,10 +208,11 @@ MAX_OPEN_POSITIONS=1
 3. **Utilisez des clés API avec permissions limitées**
 4. **Révocez et recréez vos clés régulièrement**
 5. **Activez 2FA sur votre compte Kraken**
+6. **L'interface web est en HTTP - utilisez uniquement en local**
 
 ### 📱 Monitoring
 1. **Surveillez le bot régulièrement**
-2. **Vérifiez les logs dans `trading_bot.log`**
+2. **Vérifiez les logs dans l'interface web**
 3. **Consultez vos positions sur Kraken**
 4. **Ayez un plan pour fermer les positions manuellement si nécessaire**
 
@@ -209,24 +220,45 @@ MAX_OPEN_POSITIONS=1
 
 ```
 trading/
-├── bot.py                 # Bot principal
+├── web_app.py             # Application web Flask (NOUVEAU!)
+├── bot.py                 # Bot en mode console
 ├── config.py              # Configuration
 ├── kraken_client.py       # Client API Kraken
 ├── strategy.py            # Stratégie de trading
 ├── indicators.py          # Indicateurs techniques
 ├── requirements.txt       # Dépendances Python
-├── .env                   # Configuration secrète (NON COMMITÉ)
+├── start_web.sh          # Script de démarrage web (NOUVEAU!)
+├── start.sh              # Script de démarrage console
+├── test_connection.py    # Test de connexion API
+│
+├── templates/            # Templates HTML (NOUVEAU!)
+│   ├── dashboard.html    # Dashboard principal
+│   └── settings.html     # Page de configuration
+│
+├── static/               # Fichiers statiques (NOUVEAU!)
+│   ├── css/
+│   │   └── style.css     # Styles modernes
+│   └── js/
+│       └── dashboard.js  # JavaScript temps réel
+│
+├── .env                  # Configuration secrète (NON COMMITÉ)
 ├── .env.example          # Exemple de configuration
-├── .gitignore            # Fichiers ignorés par Git
+├── .gitignore            # Fichiers ignorés
 ├── trading_bot.log       # Logs du bot
 └── README.md             # Ce fichier
 ```
 
 ## 🔍 Logs et Monitoring
 
-Les logs sont enregistrés dans `trading_bot.log` et affichés dans la console.
+### Via l'Interface Web
+Les logs s'affichent en temps réel dans le dashboard avec code couleur:
+- 🔵 **Info** - Informations générales
+- 🟢 **Success** - Opérations réussies
+- 🟡 **Warning** - Avertissements
+- 🔴 **Error** - Erreurs
 
-Pour suivre les logs en temps réel:
+### Via Fichier
+Les logs sont aussi enregistrés dans `trading_bot.log`:
 ```bash
 tail -f trading_bot.log
 ```
@@ -234,7 +266,7 @@ tail -f trading_bot.log
 ## 🛠️ Développement et Personnalisation
 
 ### Modifier les Indicateurs
-Éditez `config.py` pour changer les périodes des indicateurs:
+Éditez `config.py` pour changer les périodes:
 ```python
 RSI_PERIOD = 14
 MACD_FAST = 12
@@ -245,31 +277,73 @@ EMA_LONG = 50
 ```
 
 ### Ajuster la Stratégie
-Éditez `indicators.py` dans la fonction `get_trading_signals()` pour modifier:
+Éditez `indicators.py` dans `get_trading_signals()` pour modifier:
 - Les poids des indicateurs
-- Le seuil de signal (actuellement 60%)
+- Le seuil de signal (60%)
 - Les conditions de trading
+
+### Personnaliser l'Interface
+- **CSS:** `/static/css/style.css`
+- **JavaScript:** `/static/js/dashboard.js`
+- **Templates:** `/templates/*.html`
 
 ## 📞 Support et Questions
 
-- Documentation Kraken API: https://docs.kraken.com/rest/
-- Documentation TA Library: https://technical-analysis-library-in-python.readthedocs.io/
+### Ressources Kraken
+- [Documentation API](https://docs.kraken.com/rest/)
+- [Support Kraken](https://support.kraken.com/)
+
+### Technologies Utilisées
+- **Backend:** Flask, Socket.IO, Eventlet
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+)
+- **Graphiques:** Chart.js
+- **UI:** Bootstrap 5, Font Awesome
+- **Trading:** krakenex, ta (Technical Analysis)
+
+## 🎯 Démarrage Rapide
+
+### Option 1: Interface Web (Recommandé)
+```bash
+cd /home/user/trading
+./start_web.sh
+# Ouvrez http://localhost:5000 dans votre navigateur
+# Configurez vos clés API dans Settings
+# Démarrez le bot depuis le Dashboard!
+```
+
+### Option 2: Mode Console
+```bash
+cd /home/user/trading
+nano .env  # Ajoutez vos clés API
+./start.sh
+```
+
+## 📝 Changelog
+
+### Version 2.0 (Interface Web)
+- ✅ Interface web complète avec dashboard temps réel
+- ✅ Configuration des clés API via l'interface
+- ✅ Graphiques et métriques en temps réel
+- ✅ Contrôle du bot (start/stop) via web
+- ✅ Logs en direct avec WebSocket
+- ✅ Design moderne et responsive
+
+### Version 1.0 (Console)
+- ✅ Bot de trading en ligne de commande
+- ✅ Multi-indicateurs techniques
+- ✅ Trading sur marge avec TP/SL
+- ✅ Gestion des risques
 
 ## 📜 Licence
 
 Ce projet est fourni "tel quel" sans garantie. Utilisez-le à vos propres risques.
 
-## 🎯 Prochaines Étapes
-
-1. ✅ Installer les dépendances
-2. ✅ Configurer les clés API (nouvelles clés!)
-3. ⚠️ Tester avec de petits montants
-4. 📊 Surveiller les premiers trades
-5. ⚙️ Ajuster la configuration selon vos besoins
-6. 🚀 Lancer en production (avec prudence!)
-
 ---
 
 **Bon trading! 🚀📈**
 
-**Rappel**: Ne tradez que ce que vous pouvez vous permettre de perdre.
+**Rappel**:
+- 🌐 Utilisez l'interface web pour une meilleure expérience!
+- 🔐 Ne partagez jamais vos clés API
+- ⚠️ Ne tradez que ce que vous pouvez vous permettre de perdre
+- 📊 Surveillez régulièrement vos positions

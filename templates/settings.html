@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Settings - Kraken Trading Bot</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-rocket"></i> Kraken Trading Bot
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" href="/settings">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- API Configuration -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-key"></i> API Configuration
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Sécurité:</strong> Vos clés API sont stockées localement et ne sont jamais partagées.
+                            Assurez-vous d'avoir activé les permissions suivantes sur Kraken:
+                            <ul class="mb-0 mt-2">
+                                <li>Query Funds</li>
+                                <li>Create & Modify Orders</li>
+                                <li>Query Open Orders & Trades</li>
+                            </ul>
+                        </div>
+
+                        <form id="apiForm">
+                            <div class="mb-3">
+                                <label for="apiKey" class="form-label">
+                                    <i class="fas fa-user"></i> API Key
+                                </label>
+                                <input type="text" class="form-control" id="apiKey"
+                                       placeholder="Entrez votre clé API Kraken" required>
+                                <small class="form-text text-secondary">
+                                    Trouvez votre clé API dans Settings → API sur Kraken
+                                </small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="apiSecret" class="form-label">
+                                    <i class="fas fa-lock"></i> API Secret
+                                </label>
+                                <input type="password" class="form-control" id="apiSecret"
+                                       placeholder="Entrez votre secret API" required>
+                                <small class="form-text text-secondary">
+                                    Le secret vous est donné une seule fois lors de la création de la clé
+                                </small>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary" onclick="testConnection()">
+                                    <i class="fas fa-plug"></i> Test Connection
+                                </button>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save"></i> Save Configuration
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="testResult" class="mt-3"></div>
+                    </div>
+                </div>
+
+                <!-- Trading Configuration -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-line"></i> Trading Configuration
+                    </div>
+                    <div class="card-body">
+                        <form id="tradingForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="tradingPair" class="form-label">Trading Pair</label>
+                                    <input type="text" class="form-control" id="tradingPair"
+                                           value="XXBTZUSD" readonly>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="leverage" class="form-label">
+                                        Leverage (1-5x)
+                                    </label>
+                                    <input type="number" class="form-control" id="leverage"
+                                           value="3" min="1" max="5" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="takeProfit" class="form-label">
+                                        Take Profit (%)
+                                    </label>
+                                    <input type="number" class="form-control" id="takeProfit"
+                                           value="3.0" min="0.1" step="0.1" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="stopLoss" class="form-label">
+                                        Stop Loss (%)
+                                    </label>
+                                    <input type="number" class="form-control" id="stopLoss"
+                                           value="9.0" min="0.1" step="0.1" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="checkInterval" class="form-label">
+                                        Check Interval (seconds)
+                                    </label>
+                                    <input type="number" class="form-control" id="checkInterval"
+                                           value="60" min="10" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="maxPositions" class="form-label">
+                                        Max Open Positions
+                                    </label>
+                                    <input type="number" class="form-control" id="maxPositions"
+                                           value="1" min="1" max="5" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="minOrderSize" class="form-label">
+                                        Min Order Size (BTC)
+                                    </label>
+                                    <input type="number" class="form-control" id="minOrderSize"
+                                           value="0.001" min="0.0001" step="0.0001" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="maxOrderSize" class="form-label">
+                                        Max Order Size (BTC)
+                                    </label>
+                                    <input type="number" class="form-control" id="maxOrderSize"
+                                           value="0.1" min="0.001" step="0.001" required>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="maxDailyLoss" class="form-label">
+                                    Max Daily Loss (%)
+                                </label>
+                                <input type="number" class="form-control" id="maxDailyLoss"
+                                       value="15.0" min="1" step="0.1" required>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Note:</strong> Les modifications de configuration nécessitent un redémarrage du bot pour prendre effet.
+                            </div>
+
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> Save Trading Config
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card mt-4 mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-question-circle"></i> Help & Resources
+                    </div>
+                    <div class="card-body">
+                        <h6>Comment obtenir vos clés API Kraken:</h6>
+                        <ol>
+                            <li>Connectez-vous à votre compte Kraken</li>
+                            <li>Allez dans <strong>Settings → API</strong></li>
+                            <li>Cliquez sur <strong>Generate New Key</strong></li>
+                            <li>Sélectionnez les permissions nécessaires</li>
+                            <li>Copiez la clé et le secret (le secret n'est montré qu'une fois!)</li>
+                        </ol>
+
+                        <h6 class="mt-4">Sécurité:</h6>
+                        <ul>
+                            <li>Ne partagez jamais vos clés API</li>
+                            <li>Activez 2FA sur votre compte Kraken</li>
+                            <li>Limitez les permissions API au strict minimum</li>
+                            <li>Révoquez les clés inutilisées</li>
+                        </ul>
+
+                        <h6 class="mt-4">Ressources:</h6>
+                        <ul>
+                            <li><a href="https://support.kraken.com/hc/en-us/articles/360000919966" target="_blank">Documentation API Kraken</a></li>
+                            <li><a href="https://docs.kraken.com/rest/" target="_blank">API Reference</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Load current configuration
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const config = await response.json();
+
+                document.getElementById('tradingPair').value = config.trading_pair || 'XXBTZUSD';
+                document.getElementById('leverage').value = config.leverage || 3;
+                document.getElementById('takeProfit').value = config.take_profit || 3.0;
+                document.getElementById('stopLoss').value = config.stop_loss || 9.0;
+                document.getElementById('checkInterval').value = config.check_interval || 60;
+                document.getElementById('maxPositions').value = config.max_positions || 1;
+                document.getElementById('minOrderSize').value = config.min_order_size || 0.001;
+                document.getElementById('maxOrderSize').value = config.max_position_size || 0.1;
+                document.getElementById('maxDailyLoss').value = config.max_daily_loss || 15.0;
+            } catch (error) {
+                console.error('Failed to load config:', error);
+            }
+        }
+
+        // Test API connection
+        async function testConnection() {
+            const apiKey = document.getElementById('apiKey').value;
+            const apiSecret = document.getElementById('apiSecret').value;
+            const resultDiv = document.getElementById('testResult');
+
+            if (!apiKey || !apiSecret) {
+                resultDiv.innerHTML = '<div class="alert alert-danger">Please enter both API Key and Secret</div>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Testing connection...</div>';
+
+            try {
+                const response = await fetch('/api/test-connection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_key: apiKey,
+                        api_secret: apiSecret
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    let balanceInfo = '<ul class="mb-0">';
+                    for (const [currency, amount] of Object.entries(data.balance)) {
+                        if (amount > 0) {
+                            balanceInfo += `<li>${currency}: ${amount.toFixed(6)}</li>`;
+                        }
+                    }
+                    balanceInfo += `<li>BTC Price: $${data.btc_price.toLocaleString()}</li>`;
+                    balanceInfo += '</ul>';
+
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Connection successful!</strong>
+                            ${balanceInfo}
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i>
+                            <strong>Connection failed:</strong> ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle"></i>
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        // Save API configuration
+        document.getElementById('apiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const apiKey = document.getElementById('apiKey').value;
+            const apiSecret = document.getElementById('apiSecret').value;
+            const leverage = document.getElementById('leverage').value;
+            const takeProfit = document.getElementById('takeProfit').value;
+            const stopLoss = document.getElementById('stopLoss').value;
+            const checkInterval = document.getElementById('checkInterval').value;
+            const maxPositions = document.getElementById('maxPositions').value;
+            const minOrderSize = document.getElementById('minOrderSize').value;
+            const maxOrderSize = document.getElementById('maxOrderSize').value;
+            const maxDailyLoss = document.getElementById('maxDailyLoss').value;
+
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        api_key: apiKey,
+                        api_secret: apiSecret,
+                        trading_pair: 'XXBTZUSD',
+                        leverage: leverage,
+                        take_profit: takeProfit,
+                        stop_loss: stopLoss,
+                        check_interval: checkInterval,
+                        max_positions: maxPositions,
+                        min_order_size: minOrderSize,
+                        max_position_size: maxOrderSize,
+                        max_daily_loss: maxDailyLoss
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    document.getElementById('testResult').innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i>
+                            <strong>Success!</strong> Configuration saved. You can now go to the <a href="/">Dashboard</a> and start the bot.
+                        </div>
+                    `;
+
+                    // Clear password field
+                    document.getElementById('apiSecret').value = '';
+                } else {
+                    document.getElementById('testResult').innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-times-circle"></i>
+                            <strong>Error:</strong> ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('testResult').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle"></i>
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        });
+
+        // Load configuration on page load
+        loadConfig();
+    </script>
+</body>
+</html>
