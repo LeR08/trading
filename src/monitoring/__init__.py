@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """
 Monitoring Module
-Export des métriques pour Prometheus
+Export metrics for Prometheus
 """
 from .metrics import (
     TradingMetrics,

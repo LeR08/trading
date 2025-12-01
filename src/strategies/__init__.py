@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """
 Strategies Module
-Contient toutes les stratégies de trading disponibles
+Contains all available trading strategies
 """
 from .base import BaseStrategy
 from .trend_following import TrendFollowingStrategy

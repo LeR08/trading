@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """
 API Module
-Client pour l'API Kraken
+Kraken API Client
 """
 from .kraken_api import KrakenAPI
 

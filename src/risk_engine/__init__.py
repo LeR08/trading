@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """
 Risk Engine Module
-Gestion complète du risque: sizing, circuit breaker, margin checking
+Complete risk management: sizing, circuit breaker, margin checking
 """
 from .position_sizer import PositionSizer
 from .circuit_breaker import CircuitBreaker, CircuitBreakerState

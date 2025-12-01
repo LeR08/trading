@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """
 Executor Module
-Gestion de l'exécution des ordres avec retry logic et error handling
+Order execution management with retry logic and error handling
 """
 from .order_executor import OrderExecutor, OrderStatus, KrakenErrorType
 

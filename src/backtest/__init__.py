@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 """
 Backtest Module
-Moteur de backtesting avec simulation réaliste (slippage, fees)
+Backtesting engine with realistic simulation (slippage, fees)
 """
 from .engine import BacktestEngine, PositionSide
 
