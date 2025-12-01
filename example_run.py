@@ -37,7 +37,7 @@ class TradingBot:
         pair: str = 'XBTUSD',
         strategy_name: str = 'trend_following',
         leverage: int = 10,
-        risk_per_trade: float = 0.01,  # 1% pour petit capital
+        risk_per_trade: float = 0.025,  # 2.5% MODE AGRESSIF avec 12 indicateurs
         dry_run: bool = True
     ):
         """
@@ -71,12 +71,12 @@ class TradingBot:
         logger.info("[SHIELD] Initialisation Risk Engine...")
         self.position_sizer = PositionSizer(
             default_risk_pct=risk_per_trade,
-            max_exposure_pct=0.15,  # 15% exposition max pour petit capital
+            max_exposure_pct=0.30,  # 30% exposition MODE AGRESSIF
             default_leverage=leverage
         )
         self.circuit_breaker = CircuitBreaker(
             max_drawdown_pct=0.20,  # 20% pour petit capital
-            max_daily_loss_pct=0.03,  # 3% perte max par jour
+            max_daily_loss_pct=0.05,  # 5% perte max par jour MODE AGRESSIF
             max_consecutive_losses=3   # 3 pertes consécutives max
         )
         self.margin_checker = MarginChecker(
@@ -147,9 +147,9 @@ class TradingBot:
             # Mettre à jour métriques
             self.metrics.update_signal(signal)
 
-            # Si signal neutre, on skip
-            if signal['side'] == 'hold' or signal['confidence'] < 0.6:
-                logger.info("[PAUSE] Pas de signal suffisant, on attend...")
+            # Si signal neutre, on skip (seuil 66% MODE AGRESSIF)
+            if signal['side'] == 'hold' or signal['confidence'] < 0.66:
+                logger.info("[PAUSE] Signal < 66%, on attend un signal plus fort...")
                 return
 
             # Étape 3: Vérifier TradeBalance et margin

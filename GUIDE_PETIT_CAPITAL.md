@@ -7,8 +7,8 @@ Guide pour tester le bot de trading avec un petit capital de 26$ et levier 10x.
 ### Ce que vous pouvez faire :
 - **Capital disponible** : 26 USD
 - **Pouvoir d'achat avec levier 10x** : 260 USD
-- **Risque par trade (1%)** : 0.26 USD
-- **Perte maximale journalière (3%)** : 0.78 USD
+- **Risque par trade (2.5% - MODE AGRESSIF)** : 0.65 USD
+- **Perte maximale journalière (5%)** : 1.30 USD
 - **Drawdown max avant arrêt (20%)** : 5.20 USD
 
 ### 📊 Exemple de trade :
@@ -38,16 +38,17 @@ KRK_SECRET=votre_secret_api
 PAIR=XBTUSD
 LEVERAGE=10
 
-# Risque 1% = 0.26$ par trade
-RISK_PER_TRADE=0.01
+# Risque 2.5% = 0.65$ par trade (MODE AGRESSIF)
+RISK_PER_TRADE=0.025
 
-# Stratégie
+# Stratégie améliorée avec 12 indicateurs
 STRATEGY=trend_following
 
 # Protection
 MAX_DRAWDOWN=0.20           # Stop si -20% (-5.20$)
-MAX_DAILY_LOSS_PCT=0.03     # Stop si -3% par jour (-0.78$)
+MAX_DAILY_LOSS_PCT=0.05     # Stop si -5% par jour (-1.30$)
 MAX_CONSECUTIVE_LOSSES=3     # Stop après 3 pertes
+MAX_TOTAL_EXPOSURE=0.30     # Exposition max 30% (MODE AGRESSIF)
 
 # Mode
 DRY_RUN=true                # Commencer en simulation!
@@ -66,8 +67,8 @@ python example_run.py
 ### Cycle de trading :
 
 1. **Récupère le prix BTC** toutes les 5 minutes
-2. **Analyse la tendance** avec les indicateurs (EMA, MACD, RSI)
-3. **Génère un signal** : BUY, SELL ou HOLD
+2. **Analyse la tendance** avec 12 indicateurs fiables (EMA, MACD, RSI, ADX, Bollinger, Stochastic, OBV, Williams %R, CCI, Volume, Parabolic SAR, ATR)
+3. **Génère un signal** : BUY, SELL ou HOLD (seulement si confiance >= 66%)
 4. **Calcule la taille** de position (environ 0.002-0.003 BTC)
 5. **Vérifie les risques** :
    - Margin suffisant ?
@@ -86,8 +87,8 @@ python example_run.py
 
 [TARGET] 2. Génération signal de trading...
    Signal: BUY
-   Confiance: 75.3%
-   Raison: Tendance haussière confirmée: EMA alignment + MACD bullish
+   Confiance: 72.0%
+   Raison: STRONG BUY: 72% confiance - Multi-indicateurs (seuil: 66%)
    TP: 96,142.67 | SL: 94,326.33
 
 [MONEY] 3. Vérification balance et marge...
@@ -129,10 +130,11 @@ Vous verrez :
 
 ## ⚠️ Protections Activées
 
-### 1. Circuit Breaker
+### 1. Circuit Breaker (MODE AGRESSIF)
 - **Drawdown > 20%** : Stop automatique si vous perdez 5.20$
-- **Perte journalière > 3%** : Stop si -0.78$ dans la journée
+- **Perte journalière > 5%** : Stop si -1.30$ dans la journée
 - **3 pertes consécutives** : Pause automatique
+- **Signal minimum : 66%** : Ne trade que si forte confiance
 
 ### 2. Stop Loss Automatique
 - Chaque position a un SL automatique
