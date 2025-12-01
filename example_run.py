@@ -34,10 +34,10 @@ class TradingBot:
 
     def __init__(
         self,
-        pair: str = 'XBTEUR',
+        pair: str = 'XBTUSD',
         strategy_name: str = 'trend_following',
-        leverage: int = 3,
-        risk_per_trade: float = 0.03,
+        leverage: int = 10,
+        risk_per_trade: float = 0.02,
         dry_run: bool = True
     ):
         """
@@ -194,7 +194,7 @@ class TradingBot:
             self.metrics.update_circuit_breaker(cb_status)
 
             # Étape 5: Récupérer info AssetPairs pour validation
-            logger.info("\n📋 5. Récupération contraintes AssetPairs...")
+            logger.info("\n[LIST] 5. Récupération contraintes AssetPairs...")
             asset_pairs_response = self.api.get_asset_pairs(self.pair)
 
             if asset_pairs_response.get('error'):
@@ -363,7 +363,7 @@ class TradingBot:
                 time.sleep(interval_seconds)
 
         except KeyboardInterrupt:
-            logger.info("\n\n⏹️ Arrêt du bot par l'utilisateur")
+            logger.info("\n\n[STOP] Arrêt du bot par l'utilisateur")
         except Exception as e:
             logger.error(f"\n\n[BANG] Erreur fatale: {e}", exc_info=True)
         finally:
@@ -373,9 +373,9 @@ class TradingBot:
 def main():
     """Point d'entrée principal"""
     # Lire config depuis env vars
-    pair = os.getenv('PAIR', 'XBTEUR')
-    leverage = int(os.getenv('LEVERAGE', '3'))
-    risk_per_trade = float(os.getenv('RISK_PER_TRADE', '0.03'))
+    pair = os.getenv('PAIR', 'XBTUSD')
+    leverage = int(os.getenv('LEVERAGE', '10'))
+    risk_per_trade = float(os.getenv('RISK_PER_TRADE', '0.02'))
     strategy_name = os.getenv('STRATEGY', 'trend_following')
     dry_run = os.getenv('DRY_RUN', 'true').lower() == 'true'
     interval = int(os.getenv('INTERVAL_SECONDS', '300'))
