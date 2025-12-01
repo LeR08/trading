@@ -1,0 +1,294 @@
+---
+# Namespace pour isoler l'application
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trading-bot
+  labels:
+    name: trading-bot
+    environment: production
+
+---
+# Secret pour les clés API Kraken
+# IMPORTANT: Créer ce secret manuellement avec vos vraies clés
+# kubectl create secret generic kraken-api-keys \
+#   --from-literal=api-key='YOUR_API_KEY' \
+#   --from-literal=api-secret='YOUR_API_SECRET' \
+#   -n trading-bot
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kraken-api-keys
+  namespace: trading-bot
+type: Opaque
+stringData:
+  api-key: "CHANGE_ME"
+  api-secret: "CHANGE_ME"
+
+---
+# ConfigMap pour la configuration du bot
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bot-config
+  namespace: trading-bot
+data:
+  PAIR: "XBTEUR"
+  RISK_PER_TRADE: "0.03"
+  MAX_TOTAL_EXPOSURE: "0.10"
+  LEVERAGE: "3"
+  SLIPPAGE_PCT: "0.2"
+  MAX_RETRIES: "5"
+  MAX_DRAWDOWN: "0.15"
+  LOG_LEVEL: "INFO"
+
+---
+# Deployment pour le bot de trading
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kraken-trading-bot
+  namespace: trading-bot
+  labels:
+    app: kraken-bot
+    version: v1
+spec:
+  replicas: 1  # Un seul pod pour éviter les ordres dupliqués
+  strategy:
+    type: Recreate  # Pas de rolling update pour éviter les doubles positions
+  selector:
+    matchLabels:
+      app: kraken-bot
+  template:
+    metadata:
+      labels:
+        app: kraken-bot
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      # Anti-affinity pour ne pas co-localiser les replicas (si > 1)
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - kraken-bot
+            topologyKey: "kubernetes.io/hostname"
+
+      # Service account (si besoin de permissions spécifiques)
+      serviceAccountName: default
+
+      # Security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+      - name: trading-bot
+        image: kraken-trading-bot:latest
+        imagePullPolicy: IfNotPresent
+
+        # Environment variables depuis Secret et ConfigMap
+        env:
+        - name: KRK_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kraken-api-keys
+              key: api-key
+        - name: KRK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: kraken-api-keys
+              key: api-secret
+        - name: PAIR
+          valueFrom:
+            configMapKeyRef:
+              name: bot-config
+              key: PAIR
+        - name: RISK_PER_TRADE
+          valueFrom:
+            configMapKeyRef:
+              name: bot-config
+              key: RISK_PER_TRADE
+        - name: MAX_TOTAL_EXPOSURE
+          valueFrom:
+            configMapKeyRef:
+              name: bot-config
+              key: MAX_TOTAL_EXPOSURE
+        - name: LEVERAGE
+          valueFrom:
+            configMapKeyRef:
+              name: bot-config
+              key: LEVERAGE
+        - name: SLIPPAGE_PCT
+          valueFrom:
+            configMapKeyRef:
+              name: bot-config
+              key: SLIPPAGE_PCT
+        - name: MAX_RETRIES
+          valueFrom:
+            configMapKeyRef:
+              name: bot-config
+              key: MAX_RETRIES
+        - name: MAX_DRAWDOWN
+          valueFrom:
+            configMapKeyRef:
+              name: bot-config
+              key: MAX_DRAWDOWN
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: bot-config
+              key: LOG_LEVEL
+
+        # Ports
+        ports:
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+
+        # Resource limits et requests
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 9090
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 9090
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        # Security context du container
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # False car besoin d'écrire logs
+          capabilities:
+            drop:
+            - ALL
+
+        # Volumes
+        volumeMounts:
+        - name: logs
+          mountPath: /app/logs
+        - name: data
+          mountPath: /app/data
+
+      volumes:
+      - name: logs
+        emptyDir: {}
+      - name: data
+        emptyDir: {}
+
+      # Restart policy
+      restartPolicy: Always
+
+---
+# Service pour exposer les métriques
+apiVersion: v1
+kind: Service
+metadata:
+  name: kraken-bot-metrics
+  namespace: trading-bot
+  labels:
+    app: kraken-bot
+spec:
+  type: ClusterIP
+  selector:
+    app: kraken-bot
+  ports:
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+
+---
+# ServiceMonitor pour Prometheus Operator (optionnel)
+# Décommenter si vous utilisez Prometheus Operator
+# apiVersion: monitoring.coreos.com/v1
+# kind: ServiceMonitor
+# metadata:
+#   name: kraken-bot-monitor
+#   namespace: trading-bot
+#   labels:
+#     app: kraken-bot
+# spec:
+#   selector:
+#     matchLabels:
+#       app: kraken-bot
+#   endpoints:
+#   - port: metrics
+#     interval: 30s
+#     path: /metrics
+
+---
+# PodDisruptionBudget pour haute disponibilité (si replicas > 1)
+# apiVersion: policy/v1
+# kind: PodDisruptionBudget
+# metadata:
+#   name: kraken-bot-pdb
+#   namespace: trading-bot
+# spec:
+#   minAvailable: 1
+#   selector:
+#     matchLabels:
+#       app: kraken-bot
+
+---
+# NetworkPolicy pour sécurité (optionnel)
+# Limite les connexions sortantes au strict nécessaire
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kraken-bot-netpol
+  namespace: trading-bot
+spec:
+  podSelector:
+    matchLabels:
+      app: kraken-bot
+  policyTypes:
+  - Egress
+  egress:
+  # Autoriser DNS
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: UDP
+      port: 53
+  # Autoriser HTTPS (API Kraken)
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 443
+  # Autoriser monitoring interne
+  - to:
+    - podSelector:
+        matchLabels:
+          app: prometheus
+    ports:
+    - protocol: TCP
+      port: 9090

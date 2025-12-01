@@ -1,0 +1,14 @@
+# Core dependencies pour le bot de trading Kraken BTC
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# Kraken API - doit être compatible avec votre version
+krakenex>=2.1.0
+
+# Monitoring Prometheus
+prometheus-client>=0.17.0
+flask>=3.0.0
+
+# Optionnel mais recommandé
+python-dotenv>=1.0.0
