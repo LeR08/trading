@@ -37,7 +37,7 @@ class TradingBot:
         pair: str = 'XBTUSD',
         strategy_name: str = 'trend_following',
         leverage: int = 10,
-        risk_per_trade: float = 0.02,
+        risk_per_trade: float = 0.01,  # 1% pour petit capital
         dry_run: bool = True
     ):
         """
@@ -71,13 +71,13 @@ class TradingBot:
         logger.info("[SHIELD] Initialisation Risk Engine...")
         self.position_sizer = PositionSizer(
             default_risk_pct=risk_per_trade,
-            max_exposure_pct=0.10,
+            max_exposure_pct=0.15,  # 15% exposition max pour petit capital
             default_leverage=leverage
         )
         self.circuit_breaker = CircuitBreaker(
-            max_drawdown_pct=0.15,
-            max_daily_loss_pct=0.05,
-            max_consecutive_losses=5
+            max_drawdown_pct=0.20,  # 20% pour petit capital
+            max_daily_loss_pct=0.03,  # 3% perte max par jour
+            max_consecutive_losses=3   # 3 pertes consécutives max
         )
         self.margin_checker = MarginChecker(
             min_margin_level=150.0,
@@ -375,7 +375,7 @@ def main():
     # Lire config depuis env vars
     pair = os.getenv('PAIR', 'XBTUSD')
     leverage = int(os.getenv('LEVERAGE', '10'))
-    risk_per_trade = float(os.getenv('RISK_PER_TRADE', '0.02'))
+    risk_per_trade = float(os.getenv('RISK_PER_TRADE', '0.01'))  # 1% pour petit capital
     strategy_name = os.getenv('STRATEGY', 'trend_following')
     dry_run = os.getenv('DRY_RUN', 'true').lower() == 'true'
     interval = int(os.getenv('INTERVAL_SECONDS', '300'))
