@@ -219,17 +219,26 @@ class OrderExecutor:
         if 'leverage' in signal:
             params['leverage'] = signal['leverage']
 
-        # Take Profit
-        if 'tp' in signal and signal['tp']:
-            params['close_ordertype'] = 'limit'
-            params['close_price'] = signal['tp']
+        # Stop Loss et Take Profit avec Kraken conditional close
+        # Kraken permet UN SEUL ordre de fermeture conditionnel par position
+        # Priorité au SL pour la protection, TP géré manuellement après
+        has_sl = 'sl' in signal and signal['sl']
+        has_tp = 'tp' in signal and signal['tp']
 
-        # Stop Loss (nécessite un ordre close distinct)
-        # Note: Kraken gère TP et SL via des ordres de fermeture conditionnels
-        if 'sl' in signal and signal['sl']:
-            # Pour un SL, on utilise un ordre stop-loss
-            # Ceci nécessite une implémentation spécifique selon la doc Kraken
-            pass  # À implémenter selon besoins spécifiques
+        if has_sl and has_tp:
+            # Les deux présents: utiliser stop-loss-limit pour combiner les deux
+            # close[ordertype]=stop-loss-limit, close[price]=TP, close[price2]=SL
+            params['close[ordertype]'] = 'stop-loss-limit'
+            params['close[price]'] = str(signal['tp'])     # Prix limite (TP)
+            params['close[price2]'] = str(signal['sl'])    # Prix trigger (SL)
+        elif has_sl:
+            # Seulement SL: utiliser stop-loss simple
+            params['close[ordertype]'] = 'stop-loss'
+            params['close[price]'] = str(signal['sl'])
+        elif has_tp:
+            # Seulement TP: utiliser limit
+            params['close[ordertype]'] = 'limit'
+            params['close[price]'] = str(signal['tp'])
 
         return params
 

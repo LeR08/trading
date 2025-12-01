@@ -45,8 +45,8 @@ class TrendFollowingStrategy(BaseStrategy):
         cci_period: int = 20,
         williams_period: int = 14,
         volume_ma: int = 20,
-        tp_multiplier: float = 3.0,
-        sl_multiplier: float = 1.5
+        tp_multiplier: float = 2.0,  # MODE AGRESSIF: R:R 2:1 pour petit capital
+        sl_multiplier: float = 1.0   # Stop serré pour limiter les pertes
     ):
         """Initialise la stratégie avec 12 indicateurs"""
         super().__init__("TrendFollowing_Enhanced")
