@@ -348,5 +348,5 @@ def run_metrics_server(host: str = '0.0.0.0', port: int = 9090):
         port: Port à écouter
     """
     app = create_metrics_server(host, port)
-    logger.info(f"🚀 Démarrage serveur métriques sur {host}:{port}")
+    logger.info(f"[*] Démarrage serveur métriques sur {host}:{port}")
     app.run(host=host, port=port, threaded=True)

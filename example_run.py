@@ -51,7 +51,7 @@ class TradingBot:
             dry_run: Mode simulation (ne place pas vraiment d'ordres)
         """
         logger.info("=" * 60)
-        logger.info("🚀 Initialisation du Kraken BTC Trading Bot")
+        logger.info("[*] Initialisation du Kraken BTC Trading Bot")
         logger.info("=" * 60)
 
         self.pair = pair
@@ -60,15 +60,15 @@ class TradingBot:
         self.dry_run = dry_run
 
         # Initialiser API Kraken
-        logger.info("📡 Connexion à l'API Kraken...")
+        logger.info("[API] Connexion à l'API Kraken...")
         self.api = KrakenAPI()
 
         # Initialiser stratégie
-        logger.info(f"📊 Chargement stratégie: {strategy_name}")
+        logger.info(f"[CHART] Chargement stratégie: {strategy_name}")
         self.strategy = self._init_strategy(strategy_name)
 
         # Initialiser risk engine
-        logger.info("🛡️ Initialisation Risk Engine...")
+        logger.info("[SHIELD] Initialisation Risk Engine...")
         self.position_sizer = PositionSizer(
             default_risk_pct=risk_per_trade,
             max_exposure_pct=0.10,
@@ -85,7 +85,7 @@ class TradingBot:
         )
 
         # Initialiser executor
-        logger.info("⚡ Initialisation Order Executor...")
+        logger.info("[BOLT] Initialisation Order Executor...")
         self.executor = OrderExecutor(
             kraken_api=self.api,
             max_retries=5,
@@ -93,10 +93,10 @@ class TradingBot:
         )
 
         # Métriques Prometheus
-        logger.info("📈 Initialisation métriques Prometheus...")
+        logger.info("[UP] Initialisation métriques Prometheus...")
         self.metrics = get_metrics_instance()
 
-        logger.info("✅ Initialisation terminée\n")
+        logger.info("[OK] Initialisation terminée\n")
 
     def _init_strategy(self, name: str):
         """Initialise la stratégie sélectionnée"""
@@ -122,22 +122,22 @@ class TradingBot:
         5. Placement ordre (si conditions OK)
         """
         logger.info("\n" + "=" * 60)
-        logger.info(f"🔄 NOUVEAU CYCLE - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        logger.info(f"[CYCLE] NOUVEAU CYCLE - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         logger.info("=" * 60)
 
         try:
             # Étape 1: Récupérer données marché
-            logger.info("\n📥 1. Récupération données marché...")
+            logger.info("\n[DOWN] 1. Récupération données marché...")
             market_data = self._fetch_market_data()
             if market_data is None or market_data.empty:
-                logger.error("❌ Impossible de récupérer les données marché")
+                logger.error("[X] Impossible de récupérer les données marché")
                 return
 
             current_price = market_data['close'].iloc[-1]
             logger.info(f"   Prix actuel BTC: {current_price:,.2f} EUR")
 
             # Étape 2: Générer signal de trading
-            logger.info("\n🎯 2. Génération signal de trading...")
+            logger.info("\n[TARGET] 2. Génération signal de trading...")
             signal = self.strategy.generate_signal(market_data)
             logger.info(f"   Signal: {signal['side'].upper()}")
             logger.info(f"   Confiance: {signal['confidence']:.1%}")
@@ -149,15 +149,15 @@ class TradingBot:
 
             # Si signal neutre, on skip
             if signal['side'] == 'hold' or signal['confidence'] < 0.6:
-                logger.info("⏸️ Pas de signal suffisant, on attend...")
+                logger.info("[PAUSE] Pas de signal suffisant, on attend...")
                 return
 
             # Étape 3: Vérifier TradeBalance et margin
-            logger.info("\n💰 3. Vérification balance et marge...")
+            logger.info("\n[MONEY] 3. Vérification balance et marge...")
             trade_balance_response = self.api.get_trade_balance()
 
             if trade_balance_response.get('error'):
-                logger.error(f"❌ Erreur TradeBalance: {trade_balance_response['error']}")
+                logger.error(f"[X] Erreur TradeBalance: {trade_balance_response['error']}")
                 return
 
             trade_balance = trade_balance_response.get('result', {})
@@ -170,7 +170,7 @@ class TradingBot:
             logger.info(f"   Free Margin: {margin_status['free_margin']:,.2f} EUR")
 
             if not margin_status['sufficient']:
-                logger.warning(f"⚠️ Marge insuffisante: {margin_status['message']}")
+                logger.warning(f"[!] Marge insuffisante: {margin_status['message']}")
                 return
 
             # Mettre à jour métriques marge
@@ -178,7 +178,7 @@ class TradingBot:
             self.metrics.update_equity(equity, equity)
 
             # Étape 4: Vérifier circuit breaker
-            logger.info("\n🔐 4. Vérification circuit breaker...")
+            logger.info("\n[LOCK] 4. Vérification circuit breaker...")
             if not hasattr(self.circuit_breaker, 'initial_equity') or self.circuit_breaker.initial_equity == 0:
                 self.circuit_breaker.initialize(equity)
 
@@ -187,7 +187,7 @@ class TradingBot:
             logger.info(f"   Drawdown: {cb_status['current_drawdown']:.2%}")
 
             if not cb_status['trading_allowed']:
-                logger.warning(f"🔴 Circuit breaker OUVERT: {cb_status['reason']}")
+                logger.warning(f"[RED] Circuit breaker OUVERT: {cb_status['reason']}")
                 self.metrics.update_circuit_breaker(cb_status)
                 return
 
@@ -198,14 +198,14 @@ class TradingBot:
             asset_pairs_response = self.api.get_asset_pairs(self.pair)
 
             if asset_pairs_response.get('error'):
-                logger.warning(f"⚠️ Erreur AssetPairs: {asset_pairs_response['error']}")
+                logger.warning(f"[!] Erreur AssetPairs: {asset_pairs_response['error']}")
                 asset_pair_info = None
             else:
                 asset_pair_info = asset_pairs_response.get('result', {}).get(self.pair, {})
                 logger.info(f"   Order min: {asset_pair_info.get('ordermin', 'N/A')}")
 
             # Étape 6: Calculer taille position
-            logger.info("\n📏 6. Calcul taille position...")
+            logger.info("\n[RULER] 6. Calcul taille position...")
             stop_loss_pct = abs(current_price - signal['sl']) / current_price
 
             position_calc = self.position_sizer.calc_size(
@@ -218,7 +218,7 @@ class TradingBot:
             )
 
             if not position_calc['valid']:
-                logger.warning(f"⚠️ Position invalide: {position_calc['reason']}")
+                logger.warning(f"[!] Position invalide: {position_calc['reason']}")
                 return
 
             logger.info(f"   Volume: {position_calc['volume']} BTC")
@@ -233,21 +233,21 @@ class TradingBot:
             )
 
             if not can_open:
-                logger.warning(f"⚠️ Impossible d'ouvrir position: {reason}")
+                logger.warning(f"[!] Impossible d'ouvrir position: {reason}")
                 return
 
             # Étape 7: Placer l'ordre
-            logger.info("\n🚀 7. Placement de l'ordre...")
+            logger.info("\n[*] 7. Placement de l'ordre...")
 
             if self.dry_run:
-                logger.info("⚠️ MODE DRY-RUN: L'ordre ne sera PAS réellement placé")
+                logger.info("[!] MODE DRY-RUN: L'ordre ne sera PAS réellement placé")
                 logger.info(f"   Side: {signal['side'].upper()}")
                 logger.info(f"   Volume: {position_calc['volume']} BTC")
                 logger.info(f"   Pair: {self.pair}")
                 logger.info(f"   Leverage: {self.leverage}x")
                 logger.info(f"   Take Profit: {signal['tp']:,.2f}")
                 logger.info(f"   Stop Loss: {signal['sl']:,.2f}")
-                logger.info("✅ Ordre simulé avec succès")
+                logger.info("[OK] Ordre simulé avec succès")
 
                 # Mettre à jour métriques
                 self.metrics.record_order('success', latency=0.5)
@@ -269,15 +269,15 @@ class TradingBot:
                 latency = time.time() - start_time
 
                 if result['success']:
-                    logger.info(f"✅ Ordre placé: {result['order_id']}")
+                    logger.info(f"[OK] Ordre placé: {result['order_id']}")
                     logger.info(f"   TxID: {result['txid']}")
                     self.metrics.record_order('success', latency)
                 else:
-                    logger.error(f"❌ Échec placement ordre: {result['error']}")
+                    logger.error(f"[X] Échec placement ordre: {result['error']}")
                     self.metrics.record_order('failed', latency)
 
         except Exception as e:
-            logger.error(f"❌ Erreur durant le cycle: {e}", exc_info=True)
+            logger.error(f"[X] Erreur durant le cycle: {e}", exc_info=True)
             self.metrics.record_api_error('unknown')
 
         finally:
@@ -301,7 +301,21 @@ class TradingBot:
                 logger.error(f"Erreur OHLC: {response['error']}")
                 return None
 
-            ohlc_data = response['result'][self.pair]
+            # Kraken peut retourner une clé différente de celle demandée
+            # Ex: XBTEUR -> XXBTZEUR
+            result_keys = list(response['result'].keys())
+            # Filtrer 'last' qui est un timestamp
+            pair_keys = [k for k in result_keys if k != 'last']
+
+            if not pair_keys:
+                logger.error("Aucune donnée OHLC retournée")
+                return None
+
+            # Prendre la première paire disponible
+            actual_pair = pair_keys[0]
+            logger.debug(f"Paire demandée: {self.pair}, paire reçue: {actual_pair}")
+
+            ohlc_data = response['result'][actual_pair]
 
             # Convertir en DataFrame
             df = pd.DataFrame(ohlc_data, columns=[
@@ -327,7 +341,7 @@ class TradingBot:
             interval_seconds: Intervalle entre cycles (en secondes)
         """
         logger.info(f"\n{'='*60}")
-        logger.info(f"🤖 DÉMARRAGE DU BOT")
+        logger.info(f"[BOT] DÉMARRAGE DU BOT")
         logger.info(f"   Paire: {self.pair}")
         logger.info(f"   Stratégie: {self.strategy.name}")
         logger.info(f"   Leverage: {self.leverage}x")
@@ -341,19 +355,19 @@ class TradingBot:
         try:
             while True:
                 cycle_count += 1
-                logger.info(f"\n📌 Cycle #{cycle_count}")
+                logger.info(f"\n[PIN] Cycle #{cycle_count}")
 
                 self.run_cycle()
 
-                logger.info(f"\n⏳ Pause de {interval_seconds}s avant prochain cycle...")
+                logger.info(f"\n[TIME] Pause de {interval_seconds}s avant prochain cycle...")
                 time.sleep(interval_seconds)
 
         except KeyboardInterrupt:
             logger.info("\n\n⏹️ Arrêt du bot par l'utilisateur")
         except Exception as e:
-            logger.error(f"\n\n💥 Erreur fatale: {e}", exc_info=True)
+            logger.error(f"\n\n[BANG] Erreur fatale: {e}", exc_info=True)
         finally:
-            logger.info("\n👋 Bot arrêté")
+            logger.info("\n[WAVE] Bot arrêté")
 
 
 def main():
@@ -367,7 +381,7 @@ def main():
     interval = int(os.getenv('INTERVAL_SECONDS', '300'))
 
     # Démarrer serveur métriques dans un thread séparé
-    logger.info("🌐 Démarrage serveur métriques...")
+    logger.info("[WEB] Démarrage serveur métriques...")
     metrics_thread = Thread(
         target=run_metrics_server,
         args=('0.0.0.0', 9090),
@@ -377,7 +391,7 @@ def main():
 
     # Petit délai pour que le serveur démarre
     time.sleep(2)
-    logger.info("✅ Serveur métriques démarré sur http://0.0.0.0:9090/metrics\n")
+    logger.info("[OK] Serveur métriques démarré sur http://0.0.0.0:9090/metrics\n")
 
     # Créer et lancer bot
     bot = TradingBot(

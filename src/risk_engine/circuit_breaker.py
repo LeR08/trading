@@ -254,13 +254,13 @@ class CircuitBreaker:
         }
         self.trip_history.append(trip_event)
 
-        logger.error(f"🔴 CIRCUIT BREAKER DÉCLENCHÉ: {reason}")
+        logger.error(f"[RED] CIRCUIT BREAKER DÉCLENCHÉ: {reason}")
 
     def _reset(self):
         """Réinitialise le circuit breaker"""
         self.state = CircuitBreakerState.CLOSED
         self.consecutive_losses = 0
-        logger.info("🟢 Circuit Breaker: FERMÉ (trading autorisé)")
+        logger.info("[GREEN] Circuit Breaker: FERMÉ (trading autorisé)")
 
     def _can_attempt_reopen(self) -> bool:
         """
