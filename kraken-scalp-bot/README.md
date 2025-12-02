@@ -10,8 +10,37 @@ Professional scalping bot for Kraken exchange specializing in BTC/USD with 3x le
 - **Advanced Risk Management**: Position sizing, margin checks, circuit breakers, exposure limits
 - **3x Leverage Support**: Built-in margin calculations and safety checks
 - **Multiple Execution Modes**: Paper trading, validation, and live execution
+- **Web Dashboard**: Real-time web interface for monitoring and control
+- **Aggressive Mode**: Pre-configured for 5-10 trades/day
 - **Prometheus Metrics**: Real-time monitoring and alerting
 - **Comprehensive Backtesting**: Historical strategy validation with slippage and fees
+
+## 🚀 Quick Start with Web Dashboard
+
+The fastest way to get started is using the web dashboard:
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure your API keys (optional for paper mode)
+cp .env.example .env
+# Edit .env if using live mode
+
+# Launch with web interface
+python run_with_web.py
+```
+
+Then open your browser at **http://localhost:8080**
+
+The dashboard allows you to:
+- Switch between Paper and Live modes
+- Start/Stop the bot with one click
+- View real-time metrics (equity, margin, P&L)
+- Monitor open positions
+- Adjust configuration for aggressive trading (5-10 trades/day)
+
+**See [WEB_DASHBOARD.md](WEB_DASHBOARD.md) for complete guide.**
 
 ## Architecture
 
