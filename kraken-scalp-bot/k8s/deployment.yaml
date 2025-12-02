@@ -1,0 +1,187 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trading-bot
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: kraken-api-keys
+  namespace: trading-bot
+type: Opaque
+stringData:
+  KRK_KEY: "your_api_key_here"
+  KRK_SECRET: "your_api_secret_here"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bot-config
+  namespace: trading-bot
+data:
+  config.yaml: |
+    trading:
+      pair: "XBTUSD"
+      leverage: 3
+      timeframes:
+        - 3
+        - 15
+      refresh_interval: 40
+      use_partial_candle: true
+      mode: "paper"
+
+    signal:
+      confidence_threshold: 0.66
+      weights:
+        ema_8: 0.08
+        ema_21: 0.10
+        sma_50: 0.08
+        rsi_14: 0.10
+        macd: 0.12
+        atr_14: 0.08
+        bollinger: 0.10
+        stochastic: 0.08
+        adx_14: 0.10
+        cci_20: 0.06
+        obv: 0.05
+        vwap: 0.05
+
+    risk:
+      risk_per_trade: 0.01
+      max_total_exposure: 0.05
+      max_concurrent_trades: 3
+      max_daily_drawdown: 0.03
+      max_total_drawdown: 0.10
+      sl_atr_multiplier: 1.0
+      tp_reward_ratio: 0.7
+      max_trade_duration_minutes: 30
+
+    execution:
+      max_retries: 3
+      retry_delay: 2.0
+      use_limit_orders: true
+      limit_order_offset_pct: 0.0005
+
+    backtest:
+      initial_equity: 10000.0
+      maker_fee: 0.0016
+      taker_fee: 0.0026
+      slippage_pct: 0.001
+
+    monitoring:
+      enable_metrics: true
+      metrics_port: 8000
+      log_level: "INFO"
+
+    data:
+      lookback_periods: 200
+      max_cache_size: 1000
+
+    paper:
+      starting_equity: 10000.0
+      simulate_slippage: true
+      simulate_fees: true
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kraken-scalp-bot
+  namespace: trading-bot
+  labels:
+    app: scalp-bot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scalp-bot
+  template:
+    metadata:
+      labels:
+        app: scalp-bot
+    spec:
+      containers:
+      - name: bot
+        image: kraken-scalp-bot:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KRK_KEY
+          valueFrom:
+            secretKeyRef:
+              name: kraken-api-keys
+              key: KRK_KEY
+        - name: KRK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: kraken-api-keys
+              key: KRK_SECRET
+        - name: ENVIRONMENT
+          value: "production"
+        ports:
+        - containerPort: 8000
+          name: metrics
+          protocol: TCP
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: metrics
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      volumes:
+      - name: config
+        configMap:
+          name: bot-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: scalp-bot-metrics
+  namespace: trading-bot
+  labels:
+    app: scalp-bot
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: metrics
+    protocol: TCP
+    name: metrics
+  selector:
+    app: scalp-bot
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: scalp-bot-monitor
+  namespace: trading-bot
+  labels:
+    app: scalp-bot
+spec:
+  selector:
+    matchLabels:
+      app: scalp-bot
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
