@@ -1,0 +1,83 @@
+# Kraken Scalp Bot Configuration
+# All sensitive data (API keys) should be in .env file
+
+# Trading Configuration
+trading:
+  pair: "XBTUSD"  # BTC/USD on Kraken
+  leverage: 3  # 3x leverage
+  timeframes:
+    - 5   # 5-minute candles (Kraken doesn't support 3min)
+    - 15  # 15-minute candles
+  refresh_interval: 40  # seconds
+  use_partial_candle: true
+  mode: "paper"  # paper, validate, or live
+
+# Signal Configuration
+signal:
+  confidence_threshold: 0.66  # 66% minimum confidence
+
+  # Indicator weights (must sum to 1.0)
+  weights:
+    ema_8: 0.08
+    ema_21: 0.10
+    sma_50: 0.08
+    rsi_14: 0.10
+    macd: 0.12
+    atr_14: 0.08
+    bollinger: 0.10
+    stochastic: 0.08
+    adx_14: 0.10
+    cci_20: 0.06
+    obv: 0.05
+    vwap: 0.05
+
+# Risk Management Configuration
+risk:
+  risk_per_trade: 0.01  # 1% of equity per trade
+  max_total_exposure: 0.05  # 5% max total exposure
+  max_concurrent_trades: 3
+  max_daily_drawdown: 0.03  # 3% max daily loss
+  max_total_drawdown: 0.10  # 10% max total loss
+
+  # Stop Loss / Take Profit
+  sl_atr_multiplier: 1.0  # SL = ATR * multiplier
+  tp_reward_ratio: 0.7  # TP = SL distance * ratio (for scalping)
+  max_trade_duration_minutes: 30  # Auto-close after 30min
+
+# Execution Configuration
+execution:
+  max_retries: 3
+  retry_delay: 2.0  # seconds
+  use_limit_orders: true  # Use limit orders when possible
+  limit_order_offset_pct: 0.0005  # 0.05% from best bid/ask
+
+# Backtest Configuration
+backtest:
+  initial_equity: 10000.0
+  maker_fee: 0.0016  # 0.16%
+  taker_fee: 0.0026  # 0.26%
+  slippage_pct: 0.001  # 0.1%
+
+# Monitoring Configuration
+monitoring:
+  enable_metrics: true
+  metrics_port: 8000
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+  # Alerting (optional)
+  alerts:
+    enable_slack: false
+    slack_webhook: ""  # Set via environment variable
+    enable_email: false
+    email_to: ""
+
+# Data Collection Configuration
+data:
+  lookback_periods: 200  # Number of historical candles to fetch on startup
+  max_cache_size: 1000  # Max candles to keep in memory per timeframe
+
+# Paper Trading Configuration
+paper:
+  starting_equity: 10000.0
+  simulate_slippage: true
+  simulate_fees: true

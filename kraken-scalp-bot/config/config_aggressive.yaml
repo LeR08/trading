@@ -1,0 +1,85 @@
+# Kraken Scalp Bot - Aggressive Configuration
+# Target: 5-10 trades per day
+# All sensitive data (API keys) should be in .env file
+
+# Trading Configuration
+trading:
+  pair: "XBTUSD"  # BTC/USD on Kraken
+  leverage: 3  # 3x leverage
+  timeframes:
+    - 5   # 5-minute candles (Kraken doesn't support 3min)
+    - 15  # 15-minute candles
+  refresh_interval: 30  # seconds (more frequent checks)
+  use_partial_candle: true
+  mode: "paper"  # paper, validate, or live
+
+# Signal Configuration - AGGRESSIVE
+signal:
+  confidence_threshold: 0.50  # 50% threshold (down from 66% for more trades)
+
+  # Indicator weights (must sum to 1.0)
+  # Increased weight on momentum indicators
+  weights:
+    ema_8: 0.10     # Short-term trend
+    ema_21: 0.12    # Mid-term trend
+    sma_50: 0.06    # Long-term trend (reduced)
+    rsi_14: 0.12    # Momentum (increased)
+    macd: 0.14      # Trend momentum (increased)
+    atr_14: 0.06    # Volatility
+    bollinger: 0.12 # Breakout signals (increased)
+    stochastic: 0.10 # Momentum (increased)
+    adx_14: 0.08    # Trend strength
+    cci_20: 0.04    # Momentum (reduced)
+    obv: 0.03       # Volume (reduced)
+    vwap: 0.03      # Volume (reduced)
+
+# Risk Management Configuration - AGGRESSIVE
+risk:
+  risk_per_trade: 0.02  # 2% of equity per trade (up from 1%)
+  max_total_exposure: 0.10  # 10% max total exposure (up from 5%)
+  max_concurrent_trades: 5  # Allow 5 concurrent trades (up from 3)
+  max_daily_drawdown: 0.05  # 5% max daily loss (up from 3%)
+  max_total_drawdown: 0.15  # 15% max total loss (up from 10%)
+
+  # Stop Loss / Take Profit - TIGHTER for scalping
+  sl_atr_multiplier: 0.8  # Tighter SL (down from 1.0)
+  tp_reward_ratio: 0.6  # Quick profits (down from 0.7)
+  max_trade_duration_minutes: 20  # Faster exits (down from 30min)
+
+# Execution Configuration
+execution:
+  max_retries: 3
+  retry_delay: 1.5  # seconds (faster retries)
+  use_limit_orders: true  # Use limit orders when possible
+  limit_order_offset_pct: 0.0003  # 0.03% from best bid/ask (tighter)
+
+# Backtest Configuration
+backtest:
+  initial_equity: 10000.0
+  maker_fee: 0.0016  # 0.16%
+  taker_fee: 0.0026  # 0.26%
+  slippage_pct: 0.0015  # 0.15% (higher for aggressive trading)
+
+# Monitoring Configuration
+monitoring:
+  enable_metrics: true
+  metrics_port: 8000
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+  # Alerting (optional)
+  alerts:
+    enable_slack: false
+    slack_webhook: ""  # Set via environment variable
+    enable_email: false
+    email_to: ""
+
+# Data Collection Configuration
+data:
+  lookback_periods: 150  # Fewer historical candles (faster startup)
+  max_cache_size: 500  # Smaller cache (more aggressive)
+
+# Paper Trading Configuration
+paper:
+  starting_equity: 10000.0
+  simulate_slippage: true
+  simulate_fees: true
