@@ -3,7 +3,7 @@ OHLCV Data Collector - Fetches and manages candlestick data
 """
 import asyncio
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional, Tuple
 import logging
 import pandas as pd
@@ -35,9 +35,9 @@ class OHLCVCollector:
     """
 
     # Kraken interval mapping (minutes -> Kraken interval code)
+    # Valid Kraken intervals: 1, 5, 15, 30, 60, 240, 1440, 10080, 21600
     INTERVAL_MAP = {
         1: 1,
-        3: 3,
         5: 5,
         15: 15,
         30: 30,
@@ -138,7 +138,7 @@ class OHLCVCollector:
             partial_candle = None
             if candles and self.use_partial_candle:
                 last_candle = candles[-1]
-                current_time = int(datetime.utcnow().timestamp())
+                current_time = int(datetime.now(timezone.utc).timestamp())
                 candle_end_time = last_candle.timestamp + (timeframe * 60)
 
                 # If current time < candle end time, it's partial
@@ -256,7 +256,7 @@ class OHLCVCollector:
         for tf in self.timeframes:
             try:
                 # Calculate 'since' timestamp for lookback
-                now = datetime.utcnow()
+                now = datetime.now(timezone.utc)
                 since_dt = now - timedelta(minutes=tf * lookback_periods)
                 since_ts = int(since_dt.timestamp())
 

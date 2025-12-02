@@ -6,7 +6,7 @@ trading:
   pair: "XBTUSD"  # BTC/USD on Kraken
   leverage: 3  # 3x leverage
   timeframes:
-    - 3   # 3-minute candles
+    - 5   # 5-minute candles (Kraken doesn't support 3min)
     - 15  # 15-minute candles
   refresh_interval: 40  # seconds
   use_partial_candle: true

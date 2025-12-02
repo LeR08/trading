@@ -4,7 +4,7 @@ Professional scalping bot for Kraken exchange specializing in BTC/USD with 3x le
 
 ## Features
 
-- **Multi-timeframe Analysis**: 3-minute and 15-minute candles
+- **Multi-timeframe Analysis**: 5-minute and 15-minute candles (Kraken valid intervals)
 - **12 Technical Indicators**: EMA(8, 21), SMA(50), RSI(14), MACD, ATR(14), Bollinger Bands, Stochastic, ADX(14), CCI(20), OBV, VWAP
 - **Confidence-Based Signals**: Only trades when confidence ≥ 66%
 - **Advanced Risk Management**: Position sizing, margin checks, circuit breakers, exposure limits

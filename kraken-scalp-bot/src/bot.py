@@ -11,7 +11,7 @@ Coordinates all modules:
 import asyncio
 import signal
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional
 import logging
 
@@ -119,22 +119,22 @@ class KrakenScalpBot:
         """Initialize bot - fetch historical data"""
         logger.info("Initializing bot...")
 
-        async with self.client:
-            # Verify asset pair configuration
-            asset_pairs = await self.client.get_asset_pairs(self.config.trading_pair)
-            logger.info(f"Asset pair info: {asset_pairs}")
+        # Note: client session is managed by run() method
+        # Verify asset pair configuration
+        asset_pairs = await self.client.get_asset_pairs(self.config.trading_pair)
+        logger.info(f"Asset pair info: {asset_pairs}")
 
-            # Initialize data collector
-            lookback = self.config.get("data.lookback_periods", 200)
-            await self.collector.initialize(lookback_periods=lookback)
+        # Initialize data collector
+        lookback = self.config.get("data.lookback_periods", 200)
+        await self.collector.initialize(lookback_periods=lookback)
 
-            logger.info("Bot initialization complete")
+        logger.info("Bot initialization complete")
 
     async def run_iteration(self):
         """Run a single bot iteration"""
         self.iteration += 1
         logger.info(f"\n{'='*60}")
-        logger.info(f"ITERATION {self.iteration} - {datetime.utcnow().isoformat()}")
+        logger.info(f"ITERATION {self.iteration} - {datetime.now(timezone.utc).isoformat()}")
         logger.info(f"{'='*60}")
 
         try:
@@ -159,7 +159,7 @@ class KrakenScalpBot:
                     continue
 
                 # Generate trading signal
-                timestamp = int(datetime.utcnow().timestamp())
+                timestamp = int(datetime.now(timezone.utc).timestamp())
                 trading_signal = self.signal_generator.generate_signal(signals, tf, timestamp)
 
                 timeframe_signals[tf] = trading_signal

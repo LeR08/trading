@@ -8,7 +8,7 @@ Handles:
 - Exposure limits
 """
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, List
 from enum import Enum
 import logging
@@ -93,7 +93,7 @@ class RiskManager:
         self.daily_pnl = 0.0
         self.total_pnl = 0.0
         self.starting_equity = 0.0
-        self.daily_reset_time = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        self.daily_reset_time = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
 
         logger.info(f"RiskManager initialized with leverage={leverage}x, risk_per_trade={risk_per_trade*100}%")
 
@@ -334,7 +334,7 @@ class RiskManager:
             equity: Current equity
         """
         # Reset daily P&L at midnight UTC
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         if now >= self.daily_reset_time + timedelta(days=1):
             self.daily_pnl = 0.0
             self.daily_reset_time = now.replace(hour=0, minute=0, second=0, microsecond=0)
