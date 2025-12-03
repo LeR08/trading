@@ -22,6 +22,14 @@ class WebhookSender:
         self.webhook_url = webhook_url or Config.WEBHOOK_URL
         self.logger = logging.getLogger('WebhookSender')
 
+        # Detect if it's a Discord webhook
+        self.is_discord = 'discord.com/api/webhooks' in self.webhook_url.lower()
+
+        if self.is_discord:
+            from discord_webhook import DiscordWebhook
+            self.discord = DiscordWebhook(self.webhook_url)
+            self.logger.info("Discord webhook detected - using Discord adapter")
+
     def send_trading_signal(self, signal_data):
         """
         Send trading signal via webhook
@@ -47,6 +55,11 @@ class WebhookSender:
         Returns:
             bool: True if successful
         """
+        # Use Discord adapter if it's a Discord webhook
+        if self.is_discord:
+            return self.discord.send_trading_signal(signal_data)
+
+        # Otherwise use generic webhook
         try:
             payload = self._format_signal_payload(signal_data)
 
@@ -170,6 +183,11 @@ class WebhookSender:
         Returns:
             bool: True if successful
         """
+        # Use Discord adapter if it's a Discord webhook
+        if self.is_discord:
+            return self.discord.send_alert(alert_type, message, data)
+
+        # Otherwise use generic webhook
         try:
             payload = {
                 'timestamp': datetime.now().isoformat(),
@@ -198,6 +216,11 @@ class WebhookSender:
         Returns:
             bool: True if webhook is accessible
         """
+        # Use Discord adapter if it's a Discord webhook
+        if self.is_discord:
+            return self.discord.test_connection()
+
+        # Otherwise use generic webhook test
         try:
             payload = {
                 'timestamp': datetime.now().isoformat(),
