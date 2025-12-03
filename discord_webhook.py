@@ -189,6 +189,85 @@ class DiscordWebhook:
             self.logger.error(f"Error sending alert: {e}")
             return False
 
+    def send_position_status(self, position_status, is_paper_trading=False):
+        """
+        Send position status update to Discord
+
+        Args:
+            position_status: Position status data from PositionTracker
+            is_paper_trading: Whether this is paper trading mode
+        """
+        try:
+            mode_emoji = "📝" if is_paper_trading else "💰"
+            mode_text = "PAPER TRADING" if is_paper_trading else "LIVE TRADING"
+
+            # Color based on total P&L
+            total_pnl = position_status['total_pnl_usd']
+            if total_pnl > 0:
+                color = 0x00ff00  # Green
+            elif total_pnl < 0:
+                color = 0xff0000  # Red
+            else:
+                color = 0x808080  # Gray
+
+            embed = {
+                "title": f"{mode_emoji} Position Status Update - {mode_text}",
+                "color": color,
+                "timestamp": datetime.now().isoformat(),
+                "fields": []
+            }
+
+            if position_status['total_positions'] == 0:
+                embed["description"] = "No open positions"
+            else:
+                # Add summary
+                embed["fields"].append({
+                    "name": "📊 Summary",
+                    "value": f"**Total Positions:** {position_status['total_positions']}\n"
+                            f"**Total P&L:** ${total_pnl:+,.2f}\n"
+                            f"**Average P&L:** {position_status['total_pnl_percent']:+.2f}%",
+                    "inline": False
+                })
+
+                # Add each position
+                for i, pos in enumerate(position_status['positions'], 1):
+                    pnl_emoji = "📈" if pos['pnl_usd'] > 0 else "📉"
+
+                    field_value = (
+                        f"**Side:** {pos['side']} | **Leverage:** {pos['leverage']}x\n"
+                        f"**Entry:** ${pos['entry_price']:,.2f}\n"
+                        f"**Current:** ${pos['current_price']:,.2f}\n"
+                        f"**P&L:** ${pos['pnl_usd']:+,.2f} ({pos['pnl_percent_leveraged']:+.2f}%)\n"
+                        f"**Status:** {pos['status']}"
+                    )
+
+                    embed["fields"].append({
+                        "name": f"{pnl_emoji} Position #{i} - {pos['volume']:.4f} BTC",
+                        "value": field_value,
+                        "inline": True
+                    })
+
+            embed["footer"] = {
+                "text": f"Position Monitoring | {mode_text}"
+            }
+
+            payload = {
+                "username": "Kraken Trading Bot",
+                "embeds": [embed]
+            }
+
+            response = requests.post(
+                self.webhook_url,
+                json=payload,
+                timeout=10
+            )
+
+            return response.status_code == 204
+
+        except Exception as e:
+            self.logger.error(f"Error sending position status: {e}")
+            return False
+
     def test_connection(self):
         """Test Discord webhook connection"""
         try:

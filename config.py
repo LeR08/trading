@@ -24,6 +24,7 @@ class Config:
     STOP_LOSS_PERCENT = float(os.getenv('STOP_LOSS_PERCENT', '2.0'))
 
     # Bot Settings
+    PAPER_TRADING = os.getenv('PAPER_TRADING', 'true').lower() == 'true'
     CHECK_INTERVAL = int(os.getenv('CHECK_INTERVAL', '60'))  # seconds
     MIN_ORDER_SIZE = float(os.getenv('MIN_ORDER_SIZE', '0.001'))
     MAX_POSITION_SIZE = float(os.getenv('MAX_POSITION_SIZE', '0.1'))

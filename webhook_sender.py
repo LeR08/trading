@@ -209,6 +209,43 @@ class WebhookSender:
             self.logger.error(f"Error sending alert: {e}")
             return False
 
+    def send_position_status(self, position_status, is_paper_trading=False):
+        """
+        Send position status update
+
+        Args:
+            position_status: Position status data
+            is_paper_trading: Whether in paper trading mode
+
+        Returns:
+            bool: True if successful
+        """
+        # Use Discord adapter if it's a Discord webhook
+        if self.is_discord:
+            return self.discord.send_position_status(position_status, is_paper_trading)
+
+        # Generic webhook
+        try:
+            payload = {
+                'timestamp': datetime.now().isoformat(),
+                'type': 'POSITION_STATUS',
+                'mode': 'PAPER_TRADING' if is_paper_trading else 'LIVE_TRADING',
+                'positions': position_status
+            }
+
+            response = requests.post(
+                self.webhook_url,
+                json=payload,
+                headers={'Content-Type': 'application/json'},
+                timeout=10
+            )
+
+            return response.status_code == 200
+
+        except Exception as e:
+            self.logger.error(f"Error sending position status: {e}")
+            return False
+
     def test_webhook(self):
         """
         Test webhook connection
